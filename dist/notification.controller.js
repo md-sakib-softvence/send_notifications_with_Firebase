@@ -24,6 +24,11 @@ let NotificationController = class NotificationController {
     async send(sendNotificationDto) {
         return await this.notificationService.sendPushNotification(sendNotificationDto);
     }
+    async triggerCron() {
+        console.log("hite");
+        await this.notificationService.checkAndSendDailyNotification();
+        return { success: true, message: 'Cron job executed successfully' };
+    }
 };
 exports.NotificationController = NotificationController;
 __decorate([
@@ -33,6 +38,12 @@ __decorate([
     __metadata("design:paramtypes", [notification_dto_1.SendNotificationDto]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "send", null);
+__decorate([
+    (0, common_1.Get)('cron'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "triggerCron", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, common_1.Controller)('notifications'),
     __metadata("design:paramtypes", [notification_service_1.NotificationService])

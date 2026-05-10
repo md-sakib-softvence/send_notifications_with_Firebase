@@ -1,5 +1,5 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+
 import { FirebaseService } from './firebase.service';
 import { SendNotificationDto } from './notification.dto';
 
@@ -41,7 +41,7 @@ export class NotificationService {
         }
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+
     async checkAndSendDailyNotification() {
         this.logger.log('Running daily notification check...');
         try {

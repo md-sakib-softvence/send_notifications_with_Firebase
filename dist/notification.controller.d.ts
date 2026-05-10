@@ -12,4 +12,8 @@ export declare class NotificationController {
         error: any;
         messageId?: undefined;
     }>;
+    triggerCron(): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }
