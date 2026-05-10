@@ -84,10 +84,18 @@ let NotificationService = NotificationService_1 = class NotificationService {
                 }
                 if (now >= reminderTime) {
                     this.logger.log(`Reminder expired for doc ${doc.id}. Sending notification...`);
+                    const appTitle = data.appTitle;
+                    const appId = data.appId;
+                    const titleStr = appTitle ? `Time to test ${appTitle}!` : (data.title || 'Daily Reminder');
+                    const bodyStr = data.body || 'Keep your streak alive by testing today.';
                     const payload = {
                         token: token,
-                        title: data.title || 'Daily Reminder',
-                        body: data.body || 'This is your reminder notification.',
+                        title: titleStr,
+                        body: bodyStr,
+                        data: {
+                            type: 'reminder',
+                            ...(appId && { appId }),
+                        }
                     };
                     try {
                         await this.sendPushNotification(payload);
@@ -98,6 +106,10 @@ let NotificationService = NotificationService_1 = class NotificationService {
                             isRead: false,
                             createdAt: new Date(),
                             userId: data.userId || null,
+                            data: {
+                                type: 'reminder',
+                                ...(appId && { appId }),
+                            }
                         });
                     }
                     catch (error) {
