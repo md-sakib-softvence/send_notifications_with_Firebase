@@ -6,5 +6,10 @@ export declare class NotificationController {
     send(sendNotificationDto: SendNotificationDto): Promise<{
         success: boolean;
         messageId: string;
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        messageId?: undefined;
     }>;
 }

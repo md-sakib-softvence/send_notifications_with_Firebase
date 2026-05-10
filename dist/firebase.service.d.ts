@@ -7,4 +7,5 @@ export declare class FirebaseService implements OnModuleInit {
     constructor(configService: ConfigService);
     onModuleInit(): void;
     getMessaging(): admin.messaging.Messaging;
+    getFirestore(): admin.firestore.Firestore;
 }
