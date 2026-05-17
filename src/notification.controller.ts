@@ -16,7 +16,16 @@ export class NotificationController {
     async triggerCron() {
         console.log("hite")
         this.notificationService.cronHitCount++;
-        await this.notificationService.checkAndSendDailyNotification();
+        await this.notificationService.checkAndSendDailyNotification1();
         return { success: true, message: 'Cron job executed successfully' };
+    }
+
+    // Endpoint to check if the background cron is running
+    @Get('status')
+    getStatus() {
+        return { 
+            status: 'online', 
+            cronRunCount: this.notificationService.cronHitCount 
+        };
     }
 }
