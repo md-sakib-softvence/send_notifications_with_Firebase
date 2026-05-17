@@ -15,6 +15,7 @@ export class NotificationController {
     @Get('cron')
     async triggerCron() {
         console.log("hite")
+        this.notificationService.cronHitCount++;
         await this.notificationService.checkAndSendDailyNotification();
         return { success: true, message: 'Cron job executed successfully' };
     }

@@ -5,6 +5,7 @@ import { SendNotificationDto } from './notification.dto';
 
 @Injectable()
 export class NotificationService {
+    public cronHitCount: number = 0;
     private readonly logger = new Logger(NotificationService.name);
 
     constructor(private readonly firebaseService: FirebaseService) { }
