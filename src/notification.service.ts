@@ -236,13 +236,13 @@ export class NotificationService {
 
                     // Use 'now' instead of 'reminderTime' to prevent rapid retries catching up
                     const nextDay = new Date(); 
-                    nextDay.setMinutes(nextDay.getMinutes() + 1);
+                    nextDay.setDate(nextDay.getDate() + 1);
 
                     await doc.ref.update({
                         time: nextDay.toISOString()
                     });
 
-                    this.logger.log(`Reminder ${doc.id} updated to next minute: ${nextDay.toISOString()}`);
+                    this.logger.log(`Reminder ${doc.id} updated to next day: ${nextDay.toISOString()}`);
                 }
             }
         } catch (error) {
