@@ -80,9 +80,6 @@ let FirebaseService = FirebaseService_1 = class FirebaseService {
     getMessaging() {
         return admin.messaging();
     }
-    getFirestore() {
-        return admin.firestore();
-    }
 };
 exports.FirebaseService = FirebaseService;
 exports.FirebaseService = FirebaseService = FirebaseService_1 = __decorate([

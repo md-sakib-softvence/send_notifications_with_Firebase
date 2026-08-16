@@ -11,9 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
+const notification_service_1 = require("./notification.service");
 let AppController = class AppController {
+    notificationService;
+    constructor(notificationService) {
+        this.notificationService = notificationService;
+    }
     getHello() {
-        return 'Server is running successfully!';
+        return `Server is running successfully! Cron hits: ${this.notificationService.cronHitCount}`;
     }
 };
 exports.AppController = AppController;
@@ -24,6 +29,7 @@ __decorate([
     __metadata("design:returntype", String)
 ], AppController.prototype, "getHello", null);
 exports.AppController = AppController = __decorate([
-    (0, common_1.Controller)()
+    (0, common_1.Controller)(),
+    __metadata("design:paramtypes", [notification_service_1.NotificationService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

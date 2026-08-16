@@ -4,6 +4,7 @@ import { FirebaseService } from './firebase.service';
 import { NotificationService } from './notification.service';
 import { NotificationController } from './notification.controller';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DatabaseModule } from './database.module';
 
 import { AppController } from './app.controller';
 
@@ -13,8 +14,10 @@ import { AppController } from './app.controller';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    DatabaseModule,
   ],
   controllers: [AppController, NotificationController],
   providers: [FirebaseService, NotificationService],
 })
 export class AppModule { }
+

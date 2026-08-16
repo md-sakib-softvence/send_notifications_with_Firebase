@@ -1,26 +1,22 @@
-require('dotenv').config();
-const admin = require('firebase-admin');
+const { Client } = require('pg');
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"$/, ''),
-  })
-});
-
-const db = admin.firestore();
+const connectionString = 'postgresql://neondb_owner:npg_AeQ3xy7wpIlk@ep-morning-frost-ay450a7j-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
 async function run() {
-  console.log('\n--- Reading "users" collection ---');
-  const snap = await db.collection('users').limit(3).get();
-  if (snap.empty) {
-    console.log('No documents in "users" collection.');
+  console.log('\n--- Reading "users" table ---');
+  const client = new Client({ connectionString });
+  await client.connect();
+
+  const res = await client.query('SELECT * FROM users LIMIT 3');
+  if (res.rows.length === 0) {
+    console.log('No records in "users" table.');
   } else {
-    snap.forEach(doc => {
-      console.log('ID:', doc.id, '=>', JSON.stringify(doc.data(), null, 2));
+    res.rows.forEach(row => {
+      console.log('ID:', row.id, '=>', JSON.stringify(row, null, 2));
     });
   }
+
+  await client.end();
 }
 
 run().catch(console.error);

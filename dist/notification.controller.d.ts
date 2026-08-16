@@ -1,5 +1,5 @@
 import { NotificationService } from './notification.service';
-import { SendNotificationDto } from './notification.dto';
+import { SendNotificationDto, CreateReminderDto } from './notification.dto';
 export declare class NotificationController {
     private readonly notificationService;
     constructor(notificationService: NotificationService);
@@ -12,8 +12,23 @@ export declare class NotificationController {
         error: any;
         messageId?: undefined;
     }>;
+    createOrUpdateReminder(createReminderDto: CreateReminderDto): Promise<{
+        success: boolean;
+        action: string;
+        id: any;
+    }>;
+    getReminders(): Promise<any[]>;
+    deleteReminder(id: number): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    getLogs(): Promise<any[]>;
     triggerCron(): Promise<{
         success: boolean;
         message: string;
     }>;
+    getStatus(): {
+        status: string;
+        cronRunCount: number;
+    };
 }

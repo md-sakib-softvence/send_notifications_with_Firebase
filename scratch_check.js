@@ -1,33 +1,25 @@
-require('dotenv').config();
-const admin = require('firebase-admin');
+const { Client } = require('pg');
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"$/, ''),
-  })
-});
-
-const db = admin.firestore();
+const connectionString = 'postgresql://neondb_owner:npg_AeQ3xy7wpIlk@ep-morning-frost-ay450a7j-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
 async function run() {
   console.log('🔍 Checking the latest 3 notifications created...');
   
-  const snap = await db.collection('notifications')
-    .orderBy('createdAt', 'desc')
-    .limit(3)
-    .get();
+  const client = new Client({ connectionString });
+  await client.connect();
 
-  if (snap.empty) {
+  const res = await client.query('SELECT * FROM notifications ORDER BY "createdAt" DESC LIMIT 3');
+
+  if (res.rows.length === 0) {
     console.log('No notifications found in the database.');
   } else {
-    snap.forEach(doc => {
-      const data = doc.data();
-      console.log('\n--- Document ID:', doc.id);
-      console.log(JSON.stringify(data, null, 2));
+    res.rows.forEach(row => {
+      console.log('\n--- Notification ID:', row.id);
+      console.log(JSON.stringify(row, null, 2));
     });
   }
+
+  await client.end();
 }
 
 run().catch(console.error);

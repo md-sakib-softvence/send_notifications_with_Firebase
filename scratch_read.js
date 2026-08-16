@@ -1,34 +1,32 @@
-require('dotenv').config();
-const admin = require('firebase-admin');
+const { Client } = require('pg');
 
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/"$/, ''),
-  })
-});
+const connectionString = 'postgresql://neondb_owner:npg_AeQ3xy7wpIlk@ep-morning-frost-ay450a7j-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
-const db = admin.firestore();
-
-async function checkColl(name) {
-  const snap = await db.collection(name).get();
-  console.log(`\n--- Reading "${name}" collection ---`);
-  if (snap.empty) {
-    console.log(`No documents in "${name}" collection.`);
-  } else {
-    snap.forEach(doc => {
-      console.log(doc.id, '=>', doc.data());
-    });
+async function checkTable(client, name) {
+  try {
+    const res = await client.query(`SELECT * FROM ${name}`);
+    console.log(`\n--- Reading "${name}" table ---`);
+    if (res.rows.length === 0) {
+      console.log(`No records in "${name}" table.`);
+    } else {
+      res.rows.forEach(row => {
+        console.log(row.id, '=>', row);
+      });
+    }
+  } catch (err) {
+    console.log(`\n--- Error reading "${name}" table: ${err.message} ---`);
   }
 }
 
 async function run() {
-  await checkColl('notification');
-  await checkColl('notfication');
-  await checkColl('notifications');
-  await checkColl('reminder');
-  await checkColl('reminders');
+  const client = new Client({ connectionString });
+  await client.connect();
+
+  await checkTable(client, 'notifications');
+  await checkTable(client, 'reminders');
+  await checkTable(client, 'users');
+
+  await client.end();
 }
 
 run().catch(console.error);

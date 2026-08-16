@@ -24,10 +24,28 @@ let NotificationController = class NotificationController {
     async send(sendNotificationDto) {
         return await this.notificationService.sendPushNotification(sendNotificationDto);
     }
+    async createOrUpdateReminder(createReminderDto) {
+        return await this.notificationService.createOrUpdateReminder(createReminderDto);
+    }
+    async getReminders() {
+        return await this.notificationService.getReminders();
+    }
+    async deleteReminder(id) {
+        return await this.notificationService.deleteReminder(id);
+    }
+    async getLogs() {
+        return await this.notificationService.getNotificationLogs();
+    }
     async triggerCron() {
-        console.log("hite");
-        await this.notificationService.checkAndSendDailyNotification();
+        this.notificationService.cronHitCount++;
+        await this.notificationService.checkAndSendDailyNotification1();
         return { success: true, message: 'Cron job executed successfully' };
+    }
+    getStatus() {
+        return {
+            status: 'online',
+            cronRunCount: this.notificationService.cronHitCount
+        };
     }
 };
 exports.NotificationController = NotificationController;
@@ -39,11 +57,43 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "send", null);
 __decorate([
+    (0, common_1.Post)('reminder'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [notification_dto_1.CreateReminderDto]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "createOrUpdateReminder", null);
+__decorate([
+    (0, common_1.Get)('reminders'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "getReminders", null);
+__decorate([
+    (0, common_1.Delete)('reminder/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "deleteReminder", null);
+__decorate([
+    (0, common_1.Get)('logs'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], NotificationController.prototype, "getLogs", null);
+__decorate([
     (0, common_1.Get)('cron'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "triggerCron", null);
+__decorate([
+    (0, common_1.Get)('status'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], NotificationController.prototype, "getStatus", null);
 exports.NotificationController = NotificationController = __decorate([
     (0, common_1.Controller)('notifications'),
     __metadata("design:paramtypes", [notification_service_1.NotificationService])

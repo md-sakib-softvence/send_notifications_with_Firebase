@@ -1,9 +1,12 @@
 import { FirebaseService } from './firebase.service';
-import { SendNotificationDto } from './notification.dto';
+import { DatabaseService } from './database.service';
+import { SendNotificationDto, CreateReminderDto } from './notification.dto';
 export declare class NotificationService {
     private readonly firebaseService;
+    private readonly databaseService;
+    cronHitCount: number;
     private readonly logger;
-    constructor(firebaseService: FirebaseService);
+    constructor(firebaseService: FirebaseService, databaseService: DatabaseService);
     sendPushNotification(payload: SendNotificationDto): Promise<{
         success: boolean;
         messageId: string;
@@ -13,5 +16,16 @@ export declare class NotificationService {
         error: any;
         messageId?: undefined;
     }>;
-    checkAndSendDailyNotification(): Promise<void>;
+    createOrUpdateReminder(dto: CreateReminderDto): Promise<{
+        success: boolean;
+        action: string;
+        id: any;
+    }>;
+    getReminders(): Promise<any[]>;
+    deleteReminder(id: number): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    getNotificationLogs(): Promise<any[]>;
+    checkAndSendDailyNotification1(): Promise<void>;
 }

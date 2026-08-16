@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Delete, Param, ParseIntPipe } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { SendNotificationDto } from './notification.dto';
+import { SendNotificationDto, CreateReminderDto } from './notification.dto';
 
 @Controller('notifications')
 export class NotificationController {
@@ -11,10 +11,29 @@ export class NotificationController {
         return await this.notificationService.sendPushNotification(sendNotificationDto);
     }
 
+    @Post('reminder')
+    async createOrUpdateReminder(@Body() createReminderDto: CreateReminderDto) {
+        return await this.notificationService.createOrUpdateReminder(createReminderDto);
+    }
+
+    @Get('reminders')
+    async getReminders() {
+        return await this.notificationService.getReminders();
+    }
+
+    @Delete('reminder/:id')
+    async deleteReminder(@Param('id', ParseIntPipe) id: number) {
+        return await this.notificationService.deleteReminder(id);
+    }
+
+    @Get('logs')
+    async getLogs() {
+        return await this.notificationService.getNotificationLogs();
+    }
+
     // Endpoint to be triggered by Vercel Cron Jobs (or manually)
     @Get('cron')
     async triggerCron() {
-        console.log("hite")
         this.notificationService.cronHitCount++;
         await this.notificationService.checkAndSendDailyNotification1();
         return { success: true, message: 'Cron job executed successfully' };
@@ -29,3 +48,4 @@ export class NotificationController {
         };
     }
 }
+
