@@ -30,8 +30,8 @@ let NotificationController = class NotificationController {
     async getReminders() {
         return await this.notificationService.getReminders();
     }
-    async deleteReminder(id) {
-        return await this.notificationService.deleteReminder(id);
+    async deleteReminder(userId, appId) {
+        return await this.notificationService.deleteReminder(userId, appId);
     }
     async getLogs() {
         return await this.notificationService.getNotificationLogs();
@@ -70,10 +70,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "getReminders", null);
 __decorate([
-    (0, common_1.Delete)('reminder/:id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    (0, common_1.Delete)('reminder/:userId/:appId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Param)('appId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], NotificationController.prototype, "deleteReminder", null);
 __decorate([

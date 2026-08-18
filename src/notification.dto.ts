@@ -21,34 +21,26 @@ export class SendNotificationDto {
 export class CreateReminderDto {
     @IsString()
     @IsNotEmpty()
+    userId: string;
+
+    @IsString()
+    @IsNotEmpty()
+    appId: string;
+
+    @IsString()
+    @IsNotEmpty()
+    appTitle: string;
+
+    @IsString()
+    @IsNotEmpty()
     token: string;
 
     @IsString()
     @IsNotEmpty()
     time: string;
 
-    @IsOptional()
     @IsString()
-    endDate?: string;
-
-    @IsOptional()
-    @IsString()
-    userId?: string;
-
-    @IsOptional()
-    @IsString()
-    appTitle?: string;
-
-    @IsOptional()
-    @IsString()
-    appId?: string;
-
-    @IsOptional()
-    @IsString()
-    title?: string;
-
-    @IsOptional()
-    @IsString()
-    body?: string;
+    @IsNotEmpty()
+    endDate: string;
 }
 

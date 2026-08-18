@@ -39,16 +39,29 @@ __decorate([
     __metadata("design:type", Object)
 ], SendNotificationDto.prototype, "data", void 0);
 class CreateReminderDto {
+    userId;
+    appId;
+    appTitle;
     token;
     time;
     endDate;
-    userId;
-    appTitle;
-    appId;
-    title;
-    body;
 }
 exports.CreateReminderDto = CreateReminderDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateReminderDto.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateReminderDto.prototype, "appId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateReminderDto.prototype, "appTitle", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
@@ -60,33 +73,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateReminderDto.prototype, "time", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateReminderDto.prototype, "endDate", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReminderDto.prototype, "userId", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReminderDto.prototype, "appTitle", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReminderDto.prototype, "appId", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReminderDto.prototype, "title", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateReminderDto.prototype, "body", void 0);
 //# sourceMappingURL=notification.dto.js.map

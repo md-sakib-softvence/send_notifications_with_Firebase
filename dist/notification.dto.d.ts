@@ -5,12 +5,10 @@ export declare class SendNotificationDto {
     data?: Record<string, string>;
 }
 export declare class CreateReminderDto {
+    userId: string;
+    appId: string;
+    appTitle: string;
     token: string;
     time: string;
-    endDate?: string;
-    userId?: string;
-    appTitle?: string;
-    appId?: string;
-    title?: string;
-    body?: string;
+    endDate: string;
 }

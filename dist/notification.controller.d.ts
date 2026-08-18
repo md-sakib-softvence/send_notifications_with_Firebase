@@ -14,11 +14,10 @@ export declare class NotificationController {
     }>;
     createOrUpdateReminder(createReminderDto: CreateReminderDto): Promise<{
         success: boolean;
-        action: string;
         id: any;
     }>;
     getReminders(): Promise<any[]>;
-    deleteReminder(id: number): Promise<{
+    deleteReminder(userId: string, appId: string): Promise<{
         success: boolean;
         message: string;
     }>;

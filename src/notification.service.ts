@@ -45,81 +45,25 @@ export class NotificationService {
     }
 
     async createOrUpdateReminder(dto: CreateReminderDto) {
-        this.logger.log(`createOrUpdateReminder called for token: ${dto.token}`);
+        this.logger.log(`createOrUpdateReminder called for userId: ${dto.userId}, appId: ${dto.appId}`);
         try {
-            let existingReminder: any = null;
-
-            // Search by userId and appId if both exist
-            if (dto.userId && dto.appId) {
-                const res = await this.databaseService.query(
-                    `SELECT * FROM reminders WHERE "userId" = $1 AND "appId" = $2 LIMIT 1`,
-                    [dto.userId, dto.appId]
-                );
-                if (res.rows.length > 0) {
-                    existingReminder = res.rows[0];
-                }
-            } 
+            const query = `
+                INSERT INTO reminders ("userId", "appId", "appTitle", token, "time", "endDate")
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT ("userId", "appId")
+                DO UPDATE SET token = EXCLUDED.token, "time" = EXCLUDED."time", "endDate" = EXCLUDED."endDate"
+                RETURNING id
+            `;
+            const result = await this.databaseService.query(query, [
+                dto.userId,
+                dto.appId,
+                dto.appTitle,
+                dto.token,
+                dto.time,
+                dto.endDate
+            ]);
             
-            // Otherwise, search by token and appId if both exist
-            if (!existingReminder && dto.token && dto.appId) {
-                const res = await this.databaseService.query(
-                    `SELECT * FROM reminders WHERE token = $1 AND "appId" = $2 LIMIT 1`,
-                    [dto.token, dto.appId]
-                );
-                if (res.rows.length > 0) {
-                    existingReminder = res.rows[0];
-                }
-            }
-
-            // Otherwise, fallback to matching by token only
-            if (!existingReminder && dto.token) {
-                const res = await this.databaseService.query(
-                    `SELECT * FROM reminders WHERE token = $1 LIMIT 1`,
-                    [dto.token]
-                );
-                if (res.rows.length > 0) {
-                    existingReminder = res.rows[0];
-                }
-            }
-
-            if (existingReminder) {
-                this.logger.log(`Found existing reminder with ID: ${existingReminder.id}. Modifying it.`);
-                await this.databaseService.query(
-                    `UPDATE reminders 
-                     SET time = $1, "endDate" = $2, "userId" = $3, "appTitle" = $4, "appId" = $5, title = $6, body = $7, token = $8
-                     WHERE id = $9`,
-                    [
-                        dto.time,
-                        dto.endDate || existingReminder.endDate,
-                        dto.userId || existingReminder.userId,
-                        dto.appTitle || existingReminder.appTitle,
-                        dto.appId || existingReminder.appId,
-                        dto.title || existingReminder.title,
-                        dto.body || existingReminder.body,
-                        dto.token,
-                        existingReminder.id
-                    ]
-                );
-                return { success: true, action: 'updated', id: existingReminder.id };
-            } else {
-                this.logger.log(`No existing reminder found. Inserting a new reminder.`);
-                const insertRes = await this.databaseService.query(
-                    `INSERT INTO reminders (token, time, "endDate", "userId", "appTitle", "appId", title, body)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-                    [
-                        dto.token,
-                        dto.time,
-                        dto.endDate || null,
-                        dto.userId || null,
-                        dto.appTitle || null,
-                        dto.appId || null,
-                        dto.title || null,
-                        dto.body || null
-                    ]
-                );
-                const newId = insertRes.rows[0].id;
-                return { success: true, action: 'created', id: newId };
-            }
+            return { success: true, id: result.rows[0]?.id };
         } catch (error: any) {
             this.logger.error(`Error in createOrUpdateReminder: ${error.message}`);
             throw new InternalServerErrorException(error.message);
@@ -136,10 +80,10 @@ export class NotificationService {
         }
     }
 
-    async deleteReminder(id: number) {
+    async deleteReminder(userId: string, appId: string) {
         try {
-            await this.databaseService.query('DELETE FROM reminders WHERE id = $1', [id]);
-            return { success: true, message: `Reminder ${id} deleted successfully` };
+            await this.databaseService.query('DELETE FROM reminders WHERE "userId" = $1 AND "appId" = $2', [userId, appId]);
+            return { success: true, message: `Reminder for user ${userId} and app ${appId} deleted successfully` };
         } catch (error: any) {
             this.logger.error(`Error in deleteReminder: ${error.message}`);
             throw new InternalServerErrorException(error.message);

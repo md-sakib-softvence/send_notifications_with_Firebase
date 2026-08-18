@@ -21,9 +21,9 @@ export class NotificationController {
         return await this.notificationService.getReminders();
     }
 
-    @Delete('reminder/:id')
-    async deleteReminder(@Param('id', ParseIntPipe) id: number) {
-        return await this.notificationService.deleteReminder(id);
+    @Delete('reminder/:userId/:appId')
+    async deleteReminder(@Param('userId') userId: string, @Param('appId') appId: string) {
+        return await this.notificationService.deleteReminder(userId, appId);
     }
 
     @Get('logs')
