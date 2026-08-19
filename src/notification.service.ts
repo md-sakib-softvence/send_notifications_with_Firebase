@@ -179,15 +179,15 @@ export class NotificationService {
                     }
 
                     // Use 'now' instead of 'reminderTime' to prevent rapid retries catching up
-                    const nextDay = new Date(); 
-                    nextDay.setDate(nextDay.getDate() + 1);
+                    const nextTime = new Date(); 
+                    nextTime.setMinutes(nextTime.getMinutes() + 2);
 
                     await this.databaseService.query(
                         `UPDATE reminders SET time = $1 WHERE id = $2`,
-                        [nextDay.toISOString(), id]
+                        [nextTime.toISOString(), id]
                     );
 
-                    this.logger.log(`Reminder ${id} updated to next day: ${nextDay.toISOString()}`);
+                    this.logger.log(`Reminder ${id} updated to next 2 minutes: ${nextTime.toISOString()}`);
                 }
             }
         } catch (error: any) {
