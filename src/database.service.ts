@@ -65,6 +65,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
         try {
             await this.pool.query(createRemindersTable);
+            await this.pool.query(`
+                CREATE UNIQUE INDEX IF NOT EXISTS reminders_user_app_idx 
+                ON reminders ("userId", "appId");
+            `);
             await this.pool.query(createNotificationsTable);
             await this.pool.query(createUsersTable);
             this.logger.log('✅ PostgreSQL tables checked/created successfully');
