@@ -38,4 +38,9 @@ export class FirebaseService implements OnModuleInit {
     getMessaging(): admin.messaging.Messaging {
         return admin.messaging();
     }
+
+    getFirestore(): admin.firestore.Firestore {
+        return admin.firestore();
+    }
 }
+

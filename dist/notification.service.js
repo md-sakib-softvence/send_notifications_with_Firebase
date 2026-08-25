@@ -1,10 +1,43 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -12,6 +45,7 @@ var NotificationService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = void 0;
 const common_1 = require("@nestjs/common");
+const admin = __importStar(require("firebase-admin"));
 const firebase_service_1 = require("./firebase.service");
 const database_service_1 = require("./database.service");
 let NotificationService = NotificationService_1 = class NotificationService {
@@ -108,69 +142,70 @@ let NotificationService = NotificationService_1 = class NotificationService {
     async checkAndSendDailyNotification1() {
         this.logger.log('Running daily notification check...');
         try {
-            const res = await this.databaseService.query('SELECT * FROM reminders');
+            await this.databaseService.query(`DELETE FROM reminders WHERE "endDate" IS NOT NULL AND "endDate" <= (NOW() AT TIME ZONE 'UTC')`);
+            const res = await this.databaseService.query(`SELECT * FROM reminders WHERE time <= (NOW() AT TIME ZONE 'UTC')`);
             const reminders = res.rows;
             if (reminders.length === 0) {
+                this.logger.log('No due reminders found.');
                 return;
             }
-            const now = new Date();
+            this.logger.log(`Found ${reminders.length} due reminder(s) to process.`);
             for (const reminder of reminders) {
                 const id = reminder.id;
                 const token = reminder.token;
-                const timeData = reminder.time;
-                const endDateData = reminder.endDate;
-                if (!token || !timeData) {
+                if (!token) {
                     continue;
                 }
-                if (endDateData) {
-                    const expirationTime = new Date(endDateData);
-                    if (now >= expirationTime) {
-                        this.logger.log(`Reminder ID ${id} has reached its endDate. Deleting from database.`);
-                        await this.databaseService.query('DELETE FROM reminders WHERE id = $1', [id]);
-                        continue;
+                this.logger.log(`Reminder expired for ID ${id}. Sending notification...`);
+                const appTitle = reminder.appTitle;
+                const appId = reminder.appId;
+                const titleStr = appTitle ? `Time to test ${appTitle}!` : (reminder.title || 'Daily Reminder');
+                const bodyStr = reminder.body || 'Keep your streak alive by testing today.';
+                const payload = {
+                    token: token,
+                    title: titleStr,
+                    body: bodyStr,
+                    data: {
+                        type: 'reminder',
+                        ...(appId && { appId }),
                     }
-                }
-                const reminderTime = new Date(timeData);
-                if (now >= reminderTime) {
-                    this.logger.log(`Reminder expired for ID ${id}. Sending notification...`);
-                    const appTitle = reminder.appTitle;
-                    const appId = reminder.appId;
-                    const titleStr = appTitle ? `Time to test ${appTitle}!` : (reminder.title || 'Daily Reminder');
-                    const bodyStr = reminder.body || 'Keep your streak alive by testing today.';
-                    const payload = {
-                        token: token,
-                        title: titleStr,
-                        body: bodyStr,
+                };
+                try {
+                    await this.sendPushNotification(payload);
+                    await this.databaseService.query(`INSERT INTO notifications (title, message, type, "isRead", "createdAt", "userId", data)
+                         VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+                        payload.title,
+                        payload.body,
+                        'reminder',
+                        false,
+                        new Date(),
+                        reminder.userId || null,
+                        JSON.stringify({
+                            type: 'reminder',
+                            ...(appId && { appId }),
+                        })
+                    ]);
+                    await this.firebaseService.getFirestore().collection('notifications').add({
+                        title: payload.title,
+                        message: payload.body,
+                        type: 'reminder',
+                        isRead: false,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                        userId: reminder.userId || null,
+                        appId: appId || null,
+                        appTitle: appTitle || null,
                         data: {
                             type: 'reminder',
-                            skip_firestore_save: 'true',
                             ...(appId && { appId }),
                         }
-                    };
-                    try {
-                        await this.sendPushNotification(payload);
-                        await this.databaseService.query(`INSERT INTO notifications (title, message, type, "isRead", "createdAt", "userId", data)
-                             VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
-                            payload.title,
-                            payload.body,
-                            'reminder',
-                            false,
-                            new Date(),
-                            reminder.userId || null,
-                            JSON.stringify({
-                                type: 'reminder',
-                                ...(appId && { appId }),
-                            })
-                        ]);
-                    }
-                    catch (error) {
-                        this.logger.error(`Failed to send push for reminder ${id}. It may have an invalid token.`, error);
-                    }
-                    const nextDay = new Date();
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    await this.databaseService.query(`UPDATE reminders SET time = $1 WHERE id = $2`, [nextDay.toISOString(), id]);
-                    this.logger.log(`Reminder ${id} updated to next day: ${nextDay.toISOString()}`);
+                    });
+                    this.logger.log(`✅ Saved notification to Firestore "notifications" collection for user ${reminder.userId}`);
                 }
+                catch (error) {
+                    this.logger.error(`Failed to send push or save notification for reminder ${id}.`, error);
+                }
+                await this.databaseService.query(`UPDATE reminders SET time = (NOW() AT TIME ZONE 'UTC') + INTERVAL '2 minutes' WHERE id = $1`, [id]);
+                this.logger.log(`Reminder ${id} updated to next 2 minutes in PostgreSQL.`);
             }
         }
         catch (error) {
