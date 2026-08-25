@@ -196,6 +196,7 @@ export class NotificationService {
                 );
 
                 this.logger.log(`Reminder ${id} updated to next 2 minutes in PostgreSQL.`);
+                console.log("hello")
             }
         } catch (error: any) {
             this.logger.error('Error in cron job while checking/sending notification:', error);
